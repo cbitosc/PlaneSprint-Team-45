@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Booking Page</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            margin-top: 50px;
+        }
+
+        .booking-details {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 5px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .booking-details h2 {
+            margin-top: 0;
+            color: #222831;
+            font-size: 24px;
+        }
+
+        .booking-details .form-group {
+            margin-bottom: 20px;
+        }
+
+        .booking-details label {
+            font-weight: bold;
+            color: #555555;
+        }
+
+        .booking-details input[type="text"],
+        .booking-details input[type="email"],
+        .booking-details input[type="tel"],
+        .booking-details input[type="number"],
+        .booking-details select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #dddddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .booking-details .error-message {
+            color: #dc3545;
+            margin-top: 5px;
+        }
+
+        .booking-details .button-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .booking-details .button {
+            padding: 15px 30px;
+            background-color: #f94144;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: background-color 0.3s ease;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .booking-details .button:hover {
+            background-color: #c82333;
+        }
+
+        .booking-details .button:active {
+            box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.2);
+            transform: translateY(1px);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="booking-details">
+                    <h2>Booking Details</h2>
+                    <form onsubmit="return validateForm()" action="book" method="'POST">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="name">Name</label>
+                            <input type="text" name='name' id="name" placeholder="Enter your name">
+                            <div id="nameError" class="error-message"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" name="email" id="email" placeholder="Enter your email">
+                            <div id="emailError" class="error-message"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Phone</label>
+                            <input type="tel" name="phone" id="phone" placeholder="Enter your phone number">
+                            <div id="phoneError" class="error-message"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="guests">Number of Guests</label>
+                            <select id="guests">
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                            </select>
+                        </div>
+                        <div class="payment-details">
+                            <h2>Payment Details</h2>
+                            <div class="form-group">
+                                <label for="card">Card Number</label>
+                                <input type="text" id="card" name="card" placeholder="Enter your card number">
+                                <div id="cardError" class="error-message"></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="expiry">Expiration Date</label>
+                                <input type="text" id="expiry" placeholder="MM/YYYY">
+                                <div id="expiryError" class="error-message"></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="cvv">CVV</label>
+                                <input type="number" id="cvv" placeholder="Enter the CVV">
+                                <div id="cvvError" class="error-message"></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="terms">
+                                    <input type="checkbox" id="terms"> I agree to the terms and conditions
+                                </label>
+                                <div id="termsError" class="error-message"></div>
+                            </div>
+                        </div>
+                        <div class="button-container">
+                            <button class="button" type="submit" onclick="book()">Book Now</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+    <script>
+        function validateForm() {
+            // Clear previous error messages
+            document.querySelectorAll('.error-message').forEach(function (element) {
+                element.textContent = '';
+            });
+    
+            var name = document.getElementById('name').value;
+            var email = document.getElementById('email').value;
+            var phone = document.getElementById('phone').value;
+            var card = document.getElementById('card').value;
+            var expiry = document.getElementById('expiry').value;
+            var cvv = document.getElementById('cvv').value;
+            var terms = document.getElementById('terms').checked;
+    
+            var isValid = true;
+    
+            // Name validation
+            if (name.trim() === '') {
+                document.getElementById('nameError').textContent = 'Please enter your name';
+                isValid = false;
+            }
+    
+            // Email validation
+            if (email.trim() === '') {
+                document.getElementById('emailError').textContent = 'Please enter your email';
+                isValid = false;
+            } else if (!validateEmail(email)) {
+                document.getElementById('emailError').textContent = 'Please enter a valid email address';
+                isValid = false;
+            }
+    
+            // Phone validation
+            if (phone.trim() === '') {
+                document.getElementById('phoneError').textContent = 'Please enter your phone number';
+                isValid = false;
+            }
+    
+            // Card number validation
+            if (card.trim() === '') {
+                document.getElementById('cardError').textContent = 'Please enter your card number';
+                isValid = false;
+            }
+    
+            // Expiry validation
+            if (expiry.trim() === '') {
+                document.getElementById('expiryError').textContent = 'Please enter the expiry date';
+                isValid = false;
+            }
+    
+            // CVV validation
+            if (cvv.trim() === '') {
+                document.getElementById('cvvError').textContent = 'Please enter the CVV';
+                isValid = false;
+            }
+    
+            // Terms and conditions validation
+            if (!terms) {
+                document.getElementById('termsError').textContent = 'Please agree to the terms and conditions';
+                isValid = false;
+            }
+    
+            if (isValid) {
+                // Display success message
+                alert('Form submitted successfully!');
+            }
+    
+            return isValid;
+        }
+    
+        function validateEmail(email) {
+            var re = /\S+@\S+\.\S+/;
+            return re.test(email);
+        }
+    </script>
+    
+    </script>
+</body>
+
+</html>
